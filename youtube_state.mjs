@@ -1,5 +1,4 @@
-// Fixed YoutubeStuff class
-export default class YoutubeV3 {
+class YoutubeV3 {
 	config = {
 		apiKey: undefined,		
 		channelName: undefined,		
@@ -19,7 +18,7 @@ export default class YoutubeV3 {
 		console.log(msg);
 	}
 
-	async getChannelIdByHandle(
+	async getChannelId(
 		apiKey = this.config.apiKey, 
 		handle = this.config.channelName
 	) {
@@ -30,20 +29,20 @@ export default class YoutubeV3 {
 			handle = handle.slice(1, handle.length-1);
 		}
 
-		const getHandleUrl = `https://www.googleapis.com/youtube/v3/channels?part=id&forHandle=${formattedHandle}&key=${apiKey}`;
+		const getHandleUrl = `https://www.googleapis.com/youtube/v3/channels?part=id&forHandle=${handle}&key=${apiKey}`;
 		try {
 			const response = await fetch(getHandleUrl);
 			const data = await response.json();
 			if (data.items && data.items.length > 0) {
 				const channelId = data.items[0].id;
 
-				DebugPrint(`Channel ID: ${channelId}`);
+				this.DebugPrint(`Channel ID: ${channelId}`);
 
 				if(this.config.autoAssignToConfig){this.config.channelId = channelId;}
 
 				return channelId;
 			} else {
-				DebugPrint("No channel found for that handle.");
+				this.DebugPrint("No channel found for that handle.");
 				return null;
 			}
 		} catch (error) {
@@ -63,7 +62,7 @@ export default class YoutubeV3 {
 				const response = await fetch(url);
 				const data = await response.json();
 				if (data.error) {
-					DebugPrint(`YouTube API Error (${status}):`, data.error.message);
+					this.DebugPrint(`YouTube API Error (${status}):`, data.error.message);
 					continue; 
 				}
 				if (data.items && data.items.length > 0) {
@@ -73,13 +72,13 @@ export default class YoutubeV3 {
 					}));
 					allBroadcasts = allBroadcasts.concat(itemsWithStatus);
 				} else {
-					DebugPrint(`No ${status} streams found.`);
+					this.DebugPrint(`No ${status} streams found.`);
 				}
 			} catch (error) {
 				console.error(`Network Error fetching ${status} broadcasts:`, error);
 			}
 		}
-		DebugPrint("Broadcasts found:", allBroadcasts);
+		this.DebugPrint("Broadcasts found:", allBroadcasts);
 		return allBroadcasts;
 	}
 
@@ -92,10 +91,10 @@ export default class YoutubeV3 {
 				const streamingDetails = data.items[0].liveStreamingDetails;
 				if (streamingDetails && streamingDetails.activeLiveChatId) {
 					const chatId = streamingDetails.activeLiveChatId;
-					DebugPrint(`Live Chat ID found: ${chatId}`);
+					this.DebugPrint(`Live Chat ID found: ${chatId}`);
 					return chatId;
 				} else {
-					DebugPrint("This video does not have an active live chat (it might be a regular video or a finished stream).");
+					this.DebugPrint("This video does not have an active live chat (it might be a regular video or a finished stream).");
 					return null;
 				}
 			}
@@ -110,7 +109,7 @@ export default class YoutubeV3 {
 			const response = await fetch(url);
 			const data = await response.json();
 			if (data.error) {
-				DebugPrint("YouTube API Error (chat messages):", data.error.message);
+				this.DebugPrint("YouTube API Error (chat messages):", data.error.message);
 				return null;
 			}
 			if(config.preserveMessages){
@@ -125,4 +124,3 @@ export default class YoutubeV3 {
 		}
 	}
 }
-
